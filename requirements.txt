@@ -1,4 +1,7 @@
+gunicorn
 fastapi
 pydantic
 datetime
 sqlalchemy
+uvicorn
+psycopg2

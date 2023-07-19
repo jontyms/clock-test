@@ -1,8 +1,10 @@
-FROM python:3-slim-buster
+FROM python:3
 
 RUN mkdir /code
 
 WORKDIR /code
+
+RUN ["python", "-m", "pip", "install", "--upgrade", "pip", "wheel"]
 
 COPY requirements.txt .
 

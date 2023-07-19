@@ -16,7 +16,7 @@ class ShiftUpdateRequest(BaseModel):
     end_time: datetime = None
 
 #engine = create_engine('sqlite:///database.db', echo=True)
-SQLALCHEMY_DATABASE_URL = "postgresql://root:4f803929130dbfaeabd876b62ced6fab@db/db"
+engine = create_engine("postgresql://postgres:4f803929130dbfaeabd876b62ced6fab@db/db")
 Base = declarative_base()
 
 class Shift(Base):

@@ -1,13 +1,18 @@
 services:
   frontend:
     image: jonty/clockapp
+    depends_on:
+      - db
     build: ./
-    ports: 4858:80
+    ports: 
+      - 4858:80
 
   db:
     image: postgres
     restart: always
     env_file: env
+    environment:
+      - POSTGRES_DB=db
     volumes: 
       - ~/config/postgres-clock/:/var/lib/postgresql/data
   

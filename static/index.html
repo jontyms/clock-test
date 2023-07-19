@@ -20,10 +20,22 @@
         tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+
+        .person-dropdown {
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 <body>
     <h1>Shift Data</h1>
+
+    <div class="person-dropdown">
+        <label for="person-select">Select Person:</label>
+        <select id="person-select" onchange="getShiftData()">
+            <option value="" disabled selected>Select person...</option>
+        </select>
+    </div>
+
     <table id="shiftTable">
         <thead>
             <tr>
@@ -31,8 +43,7 @@
                 <th>Person</th>
                 <th>Start Time</th>
                 <th>End Time</th>
-                <th>Net Time</th>
-                <th>Comment</th>
+                <th>Time Delta</th>
             </tr>
         </thead>
         <tbody>
@@ -40,39 +51,69 @@
     </table>
 
     <script>
-        // Fetch shift data from the API endpoint
-        fetch('/get/data/sam')
+        // Fetch distinct persons from the API endpoint
+        fetch('/persons')
             .then(response => response.json())
             .then(data => {
-                const shiftTable = document.getElementById('shiftTable');
+                const personSelect = document.getElementById('person-select');
 
-                // Iterate through the data and create table rows
-                data.data.forEach(shift => {
-                    const row = document.createElement('tr');
-
-                    const idCell = document.createElement('td');
-                    idCell.textContent = shift.id;
-                    row.appendChild(idCell);
-
-                    const personCell = document.createElement('td');
-                    personCell.textContent = shift.person;
-                    row.appendChild(personCell);
-
-                    const startTimeCell = document.createElement('td');
-                    startTimeCell.textContent = shift.start_time;
-                    row.appendChild(startTimeCell);
-
-                    const endTimeCell = document.createElement('td');
-                    endTimeCell.textContent = shift.end_time;
-                    row.appendChild(endTimeCell);
-
-                    const commentCell = document.createElement('td');
-                    commentCell.textContent = shift.comment;
-                    row.appendChild(commentCell);
-
-                    shiftTable.querySelector('tbody').appendChild(row);
+                // Populate the dropdown options with distinct persons
+                data.distinct_persons.forEach(person => {
+                    const option = document.createElement('option');
+                    option.value = person;
+                    option.textContent = person;
+                    personSelect.appendChild(option);
                 });
             });
+
+        // Function to retrieve shift data for the selected person
+        function getShiftData() {
+            const personSelect = document.getElementById('person-select');
+            const selectedPerson = personSelect.value;
+
+            if (selectedPerson) {
+                fetch(`/get/data/${selectedPerson}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const shiftTable = document.getElementById('shiftTable');
+                        const tbody = shiftTable.querySelector('tbody');
+
+                        // Clear previous data in the table
+                        tbody.innerHTML = '';
+
+                        // Iterate through the shift data and create table rows
+                        data.data.forEach(shift => {
+                            const row = document.createElement('tr');
+
+                            const idCell = document.createElement('td');
+                            idCell.textContent = shift.id;
+                            row.appendChild(idCell);
+
+                            const personCell = document.createElement('td');
+                            personCell.textContent = shift.person;
+                            row.appendChild(personCell);
+
+                            const startTimeCell = document.createElement('td');
+                            startTimeCell.textContent = shift.start_time;
+                            row.appendChild(startTimeCell);
+
+                            const endTimeCell = document.createElement('td');
+                            endTimeCell.textContent = shift.end_time;
+                            row.appendChild(endTimeCell);
+
+                            const timeDeltaCell = document.createElement('td');
+                            const startTime = new Date(shift.start_time);
+                            const endTime = new Date(shift.end_time);
+                            const timeDelta = Math.abs(endTime - startTime) / (1000 * 60 * 60);
+                            timeDeltaCell.textContent = `${timeDelta.toFixed(2)} hours`;
+                            row.appendChild(timeDeltaCell);
+
+                            tbody.appendChild(row);
+                            tbody.appendChild(row);
+                        });
+                    });
+            }
+        }
     </script>
 </body>
 </html>

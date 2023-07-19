@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Timecard</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .header {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Timecard</h1>
+
+    <div class="header">
+        <label for="week-input">Week Start Date:</label>
+        <input type="date" id="week-input" onchange="updateTimecard()">
+        
+        <label for="person-input">Person:</label>
+        <input type="text" id="person-input" onchange="updateTimecard()">
+        
+        <button onclick="updateTimecard()">Generate</button>
+    </div>
+
+    <table id="timecardTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Shift</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Hours</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <p id="total-pay"></p>
+
+    <script>
+        // Function to calculate the amount based on total hours and rate
+        function calculateAmount(totalHours) {
+            const rate = 15;
+            return totalHours * rate;
+        }
+
+        // Function to fetch timecard data based on week start date and person
+        function updateTimecard() {
+            const weekInput = document.getElementById('week-input');
+            const personInput = document.getElementById('person-input');
+            const timecardTable = document.getElementById('timecardTable');
+            const tbody = timecardTable.querySelector('tbody');
+            const totalPayElement = document.getElementById('total-pay');
+
+            // Clear previous data in the table
+            tbody.innerHTML = '';
+
+            // Retrieve week start date and person values
+            const weekStartDate = weekInput.value;
+            const person = personInput.value;
+
+            // Fetch timecard data from the API endpoint with week start date and person as URL arguments
+            fetch(`/timecard?weekStartDate=${weekStartDate}&person=${person}`)
+                .then(response => response.json())
+                .then(data => {
+                    let totalHours = 0;
+                    let totalPay = 0;
+
+                    // Iterate through the timecard data and create table rows
+                    data.forEach(entry => {
+                        const row = document.createElement('tr');
+
+                        const dateCell = document.createElement('td');
+                        dateCell.textContent = entry.date;
+                        row.appendChild(dateCell);
+
+                        const shiftCell = document.createElement('td');
+                        shiftCell.textContent = entry.shift;
+                        row.appendChild(shiftCell);
+
+                        const startTimeCell = document.createElement('td');
+                        startTimeCell.textContent = entry.start_time;
+                        row.appendChild(startTimeCell);
+
+                        const endTimeCell = document.createElement('td');
+                        endTimeCell.textContent = entry.end_time;
+                        row.appendChild(endTimeCell);
+
+                        const totalHoursCell = document.createElement('td');
+                        totalHoursCell.textContent = entry.total_hours;
+                        row.appendChild(totalHoursCell);
+
+                        const amountCell = document.createElement('td');
+                        const amount = calculateAmount(entry.total_hours);
+                        amountCell.textContent = `$${amount.toFixed(2)}`;
+                        row.appendChild(amountCell);
+
+                        tbody.appendChild(row);
+
+                        totalHours += entry.total_hours;
+                        totalPay += amount;
+                    });
+
+                    totalPayElement.textContent = `Total Pay: $${totalPay.toFixed(2)} for ${totalHours.toFixed(2)} hours`;
+                });
+        }
+    </script>
+</body>
+</html>

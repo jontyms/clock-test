@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shift Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shift Data</h1>
+    <table id="shiftTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Person</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Net Time</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // Fetch shift data from the API endpoint
+        fetch('/get/data/sam')
+            .then(response => response.json())
+            .then(data => {
+                const shiftTable = document.getElementById('shiftTable');
+
+                // Iterate through the data and create table rows
+                data.data.forEach(shift => {
+                    const row = document.createElement('tr');
+
+                    const idCell = document.createElement('td');
+                    idCell.textContent = shift.id;
+                    row.appendChild(idCell);
+
+                    const personCell = document.createElement('td');
+                    personCell.textContent = shift.person;
+                    row.appendChild(personCell);
+
+                    const startTimeCell = document.createElement('td');
+                    startTimeCell.textContent = shift.start_time;
+                    row.appendChild(startTimeCell);
+
+                    const endTimeCell = document.createElement('td');
+                    endTimeCell.textContent = shift.end_time;
+                    row.appendChild(endTimeCell);
+
+                    const commentCell = document.createElement('td');
+                    commentCell.textContent = shift.comment;
+                    row.appendChild(commentCell);
+
+                    shiftTable.querySelector('tbody').appendChild(row);
+                });
+            });
+    </script>
+</body>
+</html>
